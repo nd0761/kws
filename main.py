@@ -9,6 +9,8 @@ from scripts.base_model import CRNN
 from collections import defaultdict
 from train import train
 import sys
+import wandb
+import os
 
 
 def main_worker(weight_path):
@@ -60,14 +62,22 @@ def main_worker(weight_path):
     print(model)
     print("number of parameters:", sum([p.numel() for p in model.parameters()]))
 
+    print("set wandb")
+    os.environ["WANDB_API_KEY"] = config.wandb_api
+    wandb_session = wandb.init(project="kws", entity="nd0761")
+    wandb.config = config.__dict__
+
     print("start train section")
+    wandb_session.watch(model)
 
     train(
         model, opt,
         melspec_train, melspec_val,
         train_loader, val_loader,
-        history, config, weight_path, device=config.device
+        history, config, weight_path,
+        device=config.device, wandb_session=wandb_session
     )
+    wandb_session.finish()
 
     print("save model")
     return 0
