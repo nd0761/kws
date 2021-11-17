@@ -13,10 +13,6 @@ def train(
         history, config, weight_path, device
 ):
     for n in range(TaskConfig.num_epochs):
-        print(type(model))
-        print(type(train_loader))
-        print(type(melspec_train))
-        print(type(device))
         train_epoch(model, opt, train_loader, melspec_train, device)
 
         au_fa_fr = validation(model, val_loader,

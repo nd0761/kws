@@ -1,4 +1,4 @@
-import tqdm
+from tqdm import tqdm
 import torch
 import torch.nn.functional as F
 from metrics import count_FA_FR, get_au_fa_fr
@@ -6,7 +6,6 @@ from metrics import count_FA_FR, get_au_fa_fr
 
 def train_epoch(model, opt, loader, log_melspec, device):
     model.train()
-    print(type(loader), len(loader))
     for i, (batch, labels) in tqdm(enumerate(loader), total=len(loader)):
         batch, labels = batch.to(device), labels.to(device)
         batch = log_melspec(batch)
