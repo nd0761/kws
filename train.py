@@ -1,4 +1,4 @@
-from configs.init import TaskConfig
+from scripts.base_config import TaskConfig
 from scripts.base_train import train_epoch, validation
 from scripts.melspec import LogMelspec
 import matplotlib.pyplot as plt
