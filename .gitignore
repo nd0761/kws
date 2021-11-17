@@ -127,3 +127,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+/speech_commands/
+/log
+/speech_commands_v0.01.tar.gz

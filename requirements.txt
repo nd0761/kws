@@ -1,0 +1,12 @@
+torchaudio~=0.9.1
+torch
+numpy
+tqdm
+matplotlib
+pandas
+pytest-shutil
+dataclasses
+IPython
+thop
+PySoundFile
+sox
