@@ -1,1 +1,1 @@
-from base_config import TaskConfig
+from configs.base_config import TaskConfig

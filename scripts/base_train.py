@@ -1,7 +1,7 @@
 from tqdm import tqdm
 import torch
 import torch.nn.functional as F
-from metrics import count_FA_FR, get_au_fa_fr
+from scripts.metrics import count_FA_FR, get_au_fa_fr
 
 
 def train_epoch(model, opt, loader, log_melspec, device):
