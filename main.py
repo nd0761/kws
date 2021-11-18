@@ -1,5 +1,5 @@
 from scripts.dataset import SpeechCommandDataset
-from configs.init import TaskConfig
+from scripts.base_config import TaskConfig
 import torch
 from scripts.augmentation import AugsCreation
 from scripts.collator import get_sampler, Collator
