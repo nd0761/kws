@@ -18,7 +18,7 @@ class StreamingKws:
         for ids in range(0, x.shape[1], self.streaming_step_size):
             if ids + self.max_window_length > x.shape[1]:
                 break
-            output, hidden = model(x[:, ids:ids + self.max_window_length], hidden, True)
+            output, hidden = model(x[:, ids:ids + self.max_window_length].unsqueeze(0), hidden, True)
 
             # we need probabilities so we use softmax & CE separately
             probs.append(F.softmax(output, dim=-1)[..., 1].unsqueeze(-1))

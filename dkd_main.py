@@ -1,5 +1,6 @@
 from scripts.dataset import SpeechCommandDataset
-from configs.init import TaskConfig
+from scripts.dkd_config import TaskConfig
+from scripts.base_config import TaskConfig as TeacherConfig
 import torch
 from scripts.augmentation import AugsCreation
 from scripts.collator import get_sampler, Collator
@@ -7,16 +8,18 @@ from torch.utils.data import DataLoader
 from scripts.melspec import LogMelspec
 from scripts.base_model import CRNN
 from collections import defaultdict
-from train import train
+from distill_train import train
 import sys
 import wandb
 import os
 
 
 def main_worker(weight_path):
+    config_class = TaskConfig
+
     print("initialize dataset")
     dataset = SpeechCommandDataset(
-        path2dir='speech_commands', keywords=TaskConfig.keyword
+        path2dir='speech_commands', keywords=config_class.keyword
     )
 
     indexes = torch.randperm(len(dataset))
@@ -35,32 +38,43 @@ def main_worker(weight_path):
 
     print("initialize dataloader")
 
-    train_loader = DataLoader(train_set, batch_size=TaskConfig.batch_size,
+    train_loader = DataLoader(train_set, batch_size=config_class.batch_size,
                               shuffle=False, collate_fn=Collator(),
                               sampler=train_sampler,
                               num_workers=2, pin_memory=True)
 
-    val_loader = DataLoader(val_set, batch_size=TaskConfig.batch_size,
+    val_loader = DataLoader(val_set, batch_size=config_class.batch_size,
                             shuffle=False, collate_fn=Collator(),
                             num_workers=2, pin_memory=True)
 
     print("initialize melspec")
 
-    melspec_train = LogMelspec(is_train=True, config=TaskConfig)
-    melspec_val = LogMelspec(is_train=False, config=TaskConfig)
+    melspec_train = LogMelspec(is_train=True, config=config_class)
+    melspec_val = LogMelspec(is_train=False, config=config_class)
 
-    print("initialize model")
+    print("initialize model student")
 
     history = defaultdict(list)
-    config = TaskConfig()
-    model = CRNN(config).to(config.device)
+    config = config_class()
+    model_student = CRNN(config).to(config.device)
+
+    print("initialize model teacher")
+
+    config_teacher = TeacherConfig()
+    model_teacher = CRNN(config_teacher)
+    model_teacher.load_state_dict(torch.load(config.teacher_model_path))
+    model_teacher = model_teacher.to(config.device)
+    model_teacher.eval()
+
     opt = torch.optim.Adam(
-        model.parameters(),
+        model_student.parameters(),
         lr=config.learning_rate,
         weight_decay=config.weight_decay
     )
-    print(model)
-    print("number of parameters:", sum([p.numel() for p in model.parameters()]))
+    print(model_student)
+    print("number of parameters for student:", sum([p.numel() for p in model_student.parameters()]))
+    print(model_teacher)
+    print("number of parameters for teacher:", sum([p.numel() for p in model_teacher.parameters()]))
 
     print("set wandb")
     os.environ["WANDB_API_KEY"] = config.wandb_api
@@ -68,10 +82,10 @@ def main_worker(weight_path):
     wandb.config = config.__dict__
 
     print("start train section")
-    wandb_session.watch(model)
+    wandb_session.watch(model_student)
 
     train(
-        model, opt,
+        model_teacher, model_student, opt,
         melspec_train, melspec_val,
         train_loader, val_loader,
         history, config, weight_path,
