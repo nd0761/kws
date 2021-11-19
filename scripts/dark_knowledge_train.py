@@ -4,11 +4,11 @@ import torch.nn.functional as F
 from scripts.metrics import count_FA_FR, get_au_fa_fr
 
 
-def dkd_loss(alpha, temp, Q_st, Q_te, labels):
-    Q_st = F.log_softmax(Q_st / temp, dim=-1)
-    Q_te = F.log_softmax(Q_te / temp, dim=-1)
-    st_te_cross_entropy = F.cross_entropy(Q_st, Q_te) * alpha * temp ** 2
-    st_la_cross_entropy = F.cross_entropy(Q_st, labels) * (1 - alpha)
+def dkd_loss(alpha, temp, logits_st, logits_te, labels):
+    probs_st = F.log_softmax(logits_st / temp, dim=-1)
+    probs_te = F.log_softmax(logits_te / temp, dim=-1)
+    st_te_cross_entropy = F.cross_entropy(probs_st, probs_te) * alpha * temp ** 2
+    st_la_cross_entropy = F.cross_entropy(logits_st, labels) * (1 - alpha)
     return st_te_cross_entropy + st_la_cross_entropy
 
 
