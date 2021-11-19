@@ -11,7 +11,7 @@ def train(
         history, config, weight_path,
         device, wandb_session
 ):
-    for n in range(TaskConfig.num_epochs):
+    for n in range(config.num_epochs):
         train_epoch(teacher_model, student_model, opt, train_loader, melspec_train, device, config)
 
         au_fa_fr = validation(teacher_model, student_model, val_loader,
