@@ -12,6 +12,7 @@ from distill_train import train
 import sys
 import wandb
 import os
+torch.manual_seed(0)
 
 
 def main_worker(weight_path):
