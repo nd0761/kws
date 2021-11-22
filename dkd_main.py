@@ -8,10 +8,11 @@ from torch.utils.data import DataLoader
 from scripts.melspec import LogMelspec
 from scripts.base_model import CRNN
 from collections import defaultdict
-from distill_train import train
+from dkd_train import train
 import sys
 import wandb
 import os
+import torch.quantization
 torch.manual_seed(0)
 
 
@@ -58,6 +59,8 @@ def main_worker(weight_path):
     history = defaultdict(list)
     config = config_class()
     model_student = CRNN(config).to(config.device)
+    if config.quantize_model:
+        model_student = torch.quantization.quantize_dynamic(model_student, {torch.nn.Linear}, dtype=torch.qint8)
 
     print("initialize model teacher")
 

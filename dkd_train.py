@@ -1,5 +1,5 @@
 from scripts.base_config import TaskConfig
-from scripts.dark_knowledge_train import train_epoch, validation
+from scripts.dkd_train import train_epoch, validation
 from IPython.display import clear_output
 import torch
 

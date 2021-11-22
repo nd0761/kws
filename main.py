@@ -11,6 +11,7 @@ from train import train
 import sys
 import wandb
 import os
+import torch.quantization
 
 
 def main_worker(weight_path):
@@ -54,6 +55,8 @@ def main_worker(weight_path):
     history = defaultdict(list)
     config = TaskConfig()
     model = CRNN(config).to(config.device)
+    if config.quantize_model:
+        model = torch.quantization.quantize_dynamic(model, {torch.nn.Linear}, dtype=torch.qint8)
     opt = torch.optim.Adam(
         model.parameters(),
         lr=config.learning_rate,
